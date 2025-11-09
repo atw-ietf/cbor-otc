@@ -1,0 +1,42 @@
+# Ordinal Type Compression {#otc}
+
+A group of ordinal values, such as an array of integers or floats, can be compressed in CBOR with a locality of reference by applying a technique similar to block floating point. This has an advantage of dereferencing the larger, typically common, portion of a group values once (called an "context, "block" or "base") leaving the individual elements to be smaller deviations (called "offsets") from that reference.
+
+For a oversimplified example the numbers `1.6324`, `1.0432` and `1.7162` all share a base of `1.0` enabling the values to be encoded as their offsets of `0.6324`, `0.0432` and `0.7162` with a transmitted base of `1` used by decoders to re-expand to the original values.
+
+This document standardizes a new CBOR Tag (`#6.TBD(array)`) called "Ordinal Group Compression" (OGC) to indicate such a compression occurring for the given ordinal types within a structure (i.e. array or map) that includes this tag against any ordinal type (`int`, `float`, etc.). The contents of the tag are defined in {{tag-ogc}}.
+
+~~~ ascii-text
+#6.TBD = [
+  ? uint_base: uint,
+  ? nint_base: nint,
+  ? bstr_base: [prefix: bstr / null, suffix: bstr / null],
+  ? tstr_base: [prefix: tstr / null, suffix: tstr / null],
+  ? float_base: float,
+]
+~~~
+{: #tag-ogc title="Ordinal Group Compression Tag CDDL"}
+
+The tag MUST be either the first element in an array or a defined key in map. When structures are nested the local nested scope OGC tag, if present, takes precedence over any parent scope OGC tag . This applies to the individual ordinal types in the tag not the whole tag itself. So individual types can be re-scoped without losing the others from the parent scope.  
+
+For example an array with the previous values as example would be tagged for encoding in CBOR as follows:
+
+~~~ ascii-text
+tagged = [
+  #6.TBD([1.0]),
+  0.6324,
+  0.0432,
+  0.7162
+]
+~~~
+
+base 1024, offset +3, -4, 0, to represent 1027, 1020, 1024
+
+~~~ ascii-text
+tagged = [
+  #6.TBD([1024]),
+  3,
+  -4,
+  0
+]
+~~~

@@ -1,0 +1,25 @@
+coding: utf-8
+
+title: CBOR Ordinal Type Compression for Value Groups & Map Keys
+abbrev: asdak
+docname: draft-atw-cbor-otc-00
+stream: IETF
+
+ipr: trust200902
+area: Internet
+wg: cbor
+kw: Internet-Draft
+cat: info
+
+stand_alone: yes
+pi: [toc, sortrefs, symrefs, comments]
+
+author:
+-   ins: A. Wiethuechter
+    name: Adam Wiethuechter
+    org: Independent
+    email: atw.ietf@gmail.com
+-   ins: S. Card
+    name: Stuart Card
+    org: Critical Technologies Inc.
+    email: stu.card@critical.com

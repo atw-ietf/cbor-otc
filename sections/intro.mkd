@@ -1,0 +1,37 @@
+# Introduction
+
+## Purpose
+
+Many applications may require very compact encodings on the wire to exchange data. CBOR enables such compact encodings and with specific techniques can be further compressed. The desire of being able to readily use the smallest of the CBOR encodings (i.e. `1+0`) with slight overhead and additional complexity for some application are worth the cost.
+
+For such applications lower encoding cost can be achieved in performing compression across a group of items that share a locality of reference. 
+
+
+and with Major Type 5, herein referred to as a "map", enables flexible data models that remain compact by using integers as keys.
+
+Existing practice is to define registries of integer values to be used a keys in CBOR that sometimes, depending on the use, also have a mapping to a JSON key. These registries however are implicitly context based with no real encoding on wire to indicate what set of values to use without being in the know.
+
+A way to enable CBOR maps to explicitly indicate their "context", while also enabling compact encodings of keys, could be valuable for some applications.
+
+## Background
+
+CBOR already performs a level of compression in their two discrete ordinal types (`uint` and `nint`). This occurs when the value is within the range of 0 to 23 for these two types, allowing the lower 5-bits of the *head*, called additional information, to carry the value directly. This results in the `1+0` encoding in CBOR, also referred to as a "tiny field". For `uint` this encodes values of 0 to 23 and for `nint` is the values -1 to -24.
+
+The non-discrete ordinals types of `bstr` and `tstr` are similar to carry the length of the given data item. These typically overflow the "tiny field" requiring a "short field" or `1+1` encoding to be used to carry the length of the data item followed by the content itself.
+
+
+The most compact key form is the encoding in CBOR is `1+0` where the integer value (positive; Major Type 0 or negative; Major Type 1) is contained in the lower 5-bits of the CBOR byte and is limited to the range of -24 to 23. Usually this range in a registry is reserved to the strongest of registration policies to ensure use is not abused and fair.
+
+This can result in a proliferation of registries, that applications create in their own namespaces, to gain access to the restricted or already allocated values in this desirable range. This can cause interoperability issues when an application fails to, or improperly references, the wrong registry of values for a data structure such as a map.
+
+### Inspiration
+
+The proposed solution for the above problem is inspired by a number of previous technologies and concepts: Motorola 6800 addressing modes, Asynchronous Transfer Mode (ATM), VPI (Virtual Path Identifier), and VCI (Virtual Channel Identifier).
+
+There are two ways to describe the solution: block floating point but for integers indexing things or CBORing CBOR map keys. 
+
+## Scope
+
+This document standardizes a new tag to indicate that a group values are being compressed using a given "block", "base" or "context" based on their ordinal type. The concept is then applied to a specific use case in maps with integer keys, defining a new layout for registries of these keys. 
+
+All model specifications in this document are defined using the Concise Data Definition Language (CDDL, {{RFC8610}}).

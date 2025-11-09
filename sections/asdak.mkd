@@ -1,0 +1,90 @@
+# Using OGC for Keys in CBOR Maps
+
+Keys in CBOR maps can be either integers (`int`) or strings (`tstr`). For most specifications interested in the concise encoding of CBOR integers, the mapping to JSON is relegated to registrations in a IANA registry requesting both a number and string for registration (see {{json-names}}). Since the keys in a map can be integers the concept of OGC can be used in a more specific case to compress the keys in a map. This method is called "Application Specific Dynamically Assigned" or ASDA.
+
+This document assumes a specification will create a registry that uses the full CBOR integer range of `-2^64^` to `2^64^-1`. {{asdak-ranges}} defines a standard Label registry policy for protocol standards to use with large ecosystems expecting multiple applications with potentially shared key sets to be used in maps.
+
+Two special ranges are defined to support smaller encodings of keys: Application Specific Dynamically Assigned Keys (ASDAK) and eXtended Application Specific Dynamically Assigned Keys (XASDAK). A special reservation is made for the Application Specific Context (ASC).
+
+| CBOR Encoding Size | Range Values | Registration Policy | Range Use |
+| ------------------ | ------------ | ------------------- | --------- |
+| 1+4, 1+8 | -2^64^ to -2^16^+1 | Private Use ({{Section 4.2 of RFC8126}}) | - |
+| 1+2 | -2^16^ to -257 | Specification Required ({{Section 4.7 of RFC8126}}) | Indirect ASC |
+| 1+1 | -256 to -25 | Reserved | XASDAK |
+| 1+0 | -24 to -1 | Reserved | ASDAK |
+| 1+0 | 0 | Reserved | ASC |
+| 1+0 | 1 to 23 | Reserved | ASDAK |
+| 1+1 | 24 to 2^8^-1 | Standards Action ({{Section 4.6 of RFC8126}}) | - |
+| 1+2 | 2^8^ to 2^16^-1 | Specification Required ({{Section 4.7 of RFC8126}}) | - |
+| 1+4, 1+8 | 2^16^ to 2^64^-1 | First Come First Served ({{Section 4.3 of RFC8126}}) | - |
+{: #asdak-ranges title="ASDAK Registry Ranges, Policies & Usage"}
+
+To should be noted that the subdivision of the range between `24` and `2^64^-1` is a recommendation. A protocol standard may adjust this section of the range to fit their specific requirements. For example instead of any subdivision this part of the Label range can all be First Come First Served.
+
+A map under a protocol using this specification MUST always include Label 0 with a value as defined in {{asc}} to keep the property of "self-describing" in CBOR intact and provide local context to the current scope for the keys. Failure to do so can result in undefined behavior on decoders such as failing to perform a clean context switch. A map MAY use keys outside its context at any point by using that keys registered Label.
+
+## Application Specific Context (ASC) {#asc}
+
+The Label of 0 is assigned as the Application Specific Context (ASC) and its value is defined in {{asc-cddl}}.
+
+~~~ ascii-text
+{::include cddl/asc.cddl}
+~~~
+{: #asc-cddl title="ASC Value Array CDDL"}
+
+The `extension` element of the ASC is used to increase the size of the context into the XASDAK range by subtracting its value from the minimum value of the ASDAK range (i.e. `-24 - extension`). This allows a specification to have a context containing more than 47 keys, and dynamically scope the size of the extension into the XASDAK per map. A full extension covers the Labels of `-256` to `-1` and `1` to `23`; 279 keys total.
+
+{{asc-modes}} gives an overview of the various ASC Modes that can be selected based on the value of the ASC.
+
+| ASC Type | ASC Value | ASC Mode | ASDAK Contents | XASDAK Contents | Details |
+| -------- | --------- | -------- | -------------- | --------------- | ------- |
+| simple | `undefined` (`#7.23`) | - | - | - | Map does not use ASDAK |
+| simple | `null` (`#7.22`) | Inherited | - | - | {{inherited-asc}} |
+| array | `[int, null, uint / null]` | Direct | Contiguous Keys | Contiguous Keys | {{direct-asc}} |
+| array | `[null, nint, uint / null]` | Indirect | Curated Keys | Curated Keys | {{indirect-asc}} |
+| array | `[int, nint, uint]` | Mixed | Contiguous Keys | Curated Keys | {{mixed-asc}} |
+{: #asc-modes title="ASC Mode Definitions"}
+
+The option of an ASC containing an array of `null` for each element is not listed in {{asc-modes}} as such an encoding is invalid and considered malformed.
+
+### Inherited ASC {#inherited-asc}
+
+Inherited ASC mode is only encounter in nested maps. A nested map MUST signal the relationship it has to its parent map, to ensure the property of "self-describing" in CBOR remains intact through nesting.
+
+When a nested map uses the same ASC as its parent it MUST set the ASC to `null`. When a different ASC, besides Inherited, is required the nested map provides the proper ASC for its desired context mode.
+
+### Direct ASC {#direct-asc}
+
+Direct ASC mode requires that the ASC array contains the following in order:
+
+- An integer (`int`) to be set as the Context Key from the ranges of `-2^64^` to `-2^16^+1` or `24` to `2^64^-1`
+- A `null`
+- A `null` or unsigned integer (`uint`) set to a value from `1` to `231`
+
+This mode enables contiguous keys around the Context Key to use the Labels of ASDAK and optionally into the XASDAK.
+
+### Indirect ASC {#indirect-asc}
+
+Indirect ASC mode requires that the ASC array contains the following in order:
+
+- A `null`
+- A negative integer (`nint`) from the range of `-2^16^` to `-257`
+- A `null` or unsigned integer (`uint`) set to a value from `1` to `231`
+
+This mode enables curated keys from anywhere in the Label registry to be assigned, through a registered specification, Labels of ASDAK and optionally into the XASDAK.
+
+### Mixed ASC {#mixed-asc}
+
+Mixed ASC mode requires that the ASC array contains the following in order:
+
+- An integer (`int`) to be set as the Context Key from the ranges of `-2^64^` to `-2^16^+1` or `24` to `2^64^-1`
+- A negative integer (`nint`) from the range of `-2^16^` to `-257`
+- An unsigned integer (`uint`) set to a value from `1` to `231`
+
+This mode enables contiguous keys around the Context Key to be encoded using the Labels of ASDAK range and curated keys from anywhere in the Label registry to be assigned, through a registered specification, Labels in the XASDAK range.
+
+## Supporting JSON {#json-names}
+
+A specification can support JSON for keys in the registry by requiring that a Name is provided for each registration, besides the Indirect ASCs, to use in JSON encodings. The Name MUST be a valid JSON key string as defined in {{STD90}}. One should ensure that the length of the Name is not overly long to maintain some level of small encoding, but is subject the specific registry rules by the specification. For Label 0 the Name MUST be set to `asc` - though is unused.
+
+For ASDAK in a JSON, the concept of a "context" is rather pointless as the keys in the registry would each have a unique Name registered to use in the JSON encoding. One could have a "context" by specifying a prefix string to add to the keys but this would add overhead in encoding for no real benefit. Such behavior is NOT RECOMMENDED.

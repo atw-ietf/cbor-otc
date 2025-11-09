@@ -1,0 +1,27 @@
+---
+
+{::include sections/ietf/header.yaml}
+
+{::include sections/ietf/normative.yaml}
+
+{::include sections/ietf/informative.yaml}
+
+--- abstract
+
+This document standardizes a method to compress groupings of CBOR ordinal types such as integers and floats. The concept is then applied to the specific case of using integers as keys in CBOR maps that can be used by protocol specifications to enable re-use of the most concise CBOR encodings. Such compression to enable these encodings are desirable in highly constrained environments. 
+
+--- middle
+
+{::include-nested sections/intro.mkd}
+
+{::include-nested sections/ietf/terms.mkd} 
+
+{::include-nested sections/ordinals.mkd}
+
+{::include-nested sections/asdak.mkd}
+
+{::include-nested sections/ietf/iana.mkd}
+
+{::include-nested sections/ietf/security.mkd}
+
+--- back

@@ -1,0 +1,11 @@
+# Terminology
+
+{::boilerplate bcp14}
+
+## Additional Definitions & Abbreviations
+
+**Label**:
+: A CBOR key as part of a map, in this specification limited to an integer.
+
+**Name**:
+: A JSON key as part of an object, per {{STD90}} this is a string.
