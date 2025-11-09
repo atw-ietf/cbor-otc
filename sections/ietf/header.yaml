@@ -1,7 +1,7 @@
 coding: utf-8
 
 title: CBOR Ordinal Type Compression for Value Groups & Map Keys
-abbrev: asdak
+abbrev: otc
 docname: draft-atw-cbor-otc-00
 stream: IETF
 
