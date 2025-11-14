@@ -1,3 +1,33 @@
 # IANA Considerations {#ic}
 
-TBD
+## CBOR Tags
+
+IANA is requested to allocate four tags of the "Concise Binary Object Representation (CBOR) Tags" registry {{IANA.CBOR.Tags}}.
+
+> Note to IANA: Since the goal of this specification is to "compress" various items it is recommended that the tags assigned are as small as possible to align with this goal. It is strongly preferred that the ACO & OCC tags be from the Standards Action {{RFC8126}} area, while the ASDAM & ASDA Key Set tags are also from the Standards Action area but may be from the lower end (i.e. `1+1`) of the Specification Required area. 
+
+~~~ ascii-text
+Data Item: array
+Semantics: Array with Compressed Ordinals (ACO)
+~~~
+{: title="Tag TBD1: Array with Compressed Ordinals (ACO)"}
+
+~~~ ascii-text
+Data Item: array
+Semantics: Ordinal Compression Context (OCC)
+~~~
+{: title="Tag TBD2: Ordinal Compression Context (OCC)"}
+
+~~~ ascii-text
+Data Item: map
+Semantics: Application Specific Dynamically Assigned 
+            Map (ASDAM)
+~~~
+{: title="Tag TBD3: Application Specific Dynamically Assigned Map (ASDAM)"}
+
+~~~ ascii-text
+Data Item: map
+Semantics: Application Specific Dynamically Assigned 
+            Key Set (ASDA Key Set)
+~~~
+{: title="Tag TBD4: Application Specific Dynamically Assigned Key Set (ASDA Key Set)"}

@@ -5,8 +5,8 @@
 ] / null / undefined
 
 direct = &(
-  priv: -2^64^..-2^16^+1,
-  spec: 24..2^64^-1
+  priv: -2^64..(-2^16)+1,
+  spec: 24..(2^64)-1
 )
-indirect = -2^16^..-257
-ext = 1..231
+indirect = -2^16..-257
+ext = 1..232

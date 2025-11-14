@@ -3,3 +3,11 @@ informative:
   RFC8610: # cddl
 
   STD90: # json
+
+  IANA.CBOR.Tags:
+    title: CBOR Tags
+    author:
+      -
+        org: IANA
+    target: https://www.iana.org/assignments/cbor-tags/cbor-tags/
+    date: November 2025
