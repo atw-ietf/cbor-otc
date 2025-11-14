@@ -32,9 +32,9 @@ The Label of 0 is assigned as the Application Specific Context (ASC) and its val
 ~~~
 {: #asc-cddl title="ASC Value Array CDDL"}
 
-The `extension` element of the ASC is used to increase the size of the context into the XASDAK range by add its value from the maximum value of the ASDAK range (i.e. `23 + extension`). This allows a specification to have a context containing more than 47 keys, and dynamically scope the size of the extension into the XASDAK per map. A full extension covers the Labels of `-24` to `-1` and `1` to `255`; 279 keys total.
+The `extension` element of the ASC is used to increase the size of the context into the XASDAK range by adding its value from the maximum value of the ASDAK range (i.e. `23 + extension`). This allows a specification to have a context containing more than 47 keys, and dynamically scope the size of the extension into the XASDAK per ASC. A full extension covers the Labels of `-24` to `-1` and `1` to `255`; 279 keys total.
 
-{{asc-modes}} gives an overview of the various ASC Modes that can be selected based on the value of the ASC.
+{{asc-modes}} gives an overview of the various states the ASC could be in and what ASC Modes they map to.
 
 | ASC Type | ASC Value | ASC Mode | ASDAK Contents | XASDAK Contents | Details |
 | -------- | --------- | -------- | -------------- | --------------- | ------- |
@@ -42,14 +42,15 @@ The `extension` element of the ASC is used to increase the size of the context i
 | array | `[int, null, uint / null]` | Direct | Contiguous Keys | Contiguous Keys | {{direct-asc}} |
 | array | `[null, nint, uint / null]` | Indirect | Curated Keys | Curated Keys | {{indirect-asc}} |
 | array | `[int, nint, uint]` | Mixed | Contiguous Keys | Curated Keys | {{mixed-asc}} |
-| array | `[null, null, null]` / `undefined` (`#7.23`) | - | - | - | {{asdaks}} |
+| simple | `undefined` (`#7.23`) | Key Set | - | - | {{asdaks}} |
+| array | `[null, null, null]` | - | - | - | Invalid ASC |
 {: #asc-modes title="ASC Mode Definitions"}
 
 ### Inherited ASC {#inherited-asc}
 
 Inherited ASC mode is only encounter in nested maps. A nested map MUST signal the relationship it has to its parent map, to ensure the property of "self-describing" in CBOR remains intact through nesting.
 
-When a nested map uses the same ASC as its parent it MUST set the ASC to `null`. When a different ASC, besides Inherited, is required the nested map provides the proper ASC for its desired context mode.
+When a nested map uses the same ASC as its parent it MUST set the ASC to `null`. When a different ASC, besides Inherited, is required the nested map provides the proper ASC for its desired mode.
 
 ### Direct ASC {#direct-asc}
 
@@ -89,13 +90,15 @@ The smaller range (`-256` to `-25`) is reserved for ASDA-IKS. It provides an app
 
 The larger range (`-2^16` to `-257`) is set aside for specifications that register for an ASDA-OKS and provide a controlled out of band a registry mapping the ASDAK and/or XASDAK keys to curated keys from the rest of the registry. The procedures and behavior of an ASDA-OKS registry for a given protocol is out of scope for this document.
 
+ASDA Key Sets can be exchanged using the tags in {{asdaks}} either in-band or out-of-band as needed. It is up to a protocol specification how and when these ASDA Key Sets are discovered and exchanged.
+
 ### ASDA Key Set {#asdaks}
 
-An ASDA Key Set ( CBOR Tag `#6.TBD4(map)`) contains a map with keys from the ASDAK and/or XASDAK range pointing to their respective curated key. The ASDA Key Set can be found as part of an ASDAM under keys of the ASDA-IKS or ASDA-OKS range. {{asdaks-example}} provides a short example showing how Labels -44 and -5000 can be encoded for use as ASDA Key Sets. 
+An ASDA Key Set (`#6.TBD4(map)`) contains a map with keys from the ASDAK and/or XASDAK range pointing to their respective curated key. The ASDA Key Set can be found as part of an ASDAM under keys of the ASDA-IKS or ASDA-OKS range. {{asdaks-example}} provides a short example of a standalone Key Set using the ASC Mode.
 
 ~~~ ascii-text
 #6.TBD3({
-  0: [null, null, null],
+  0: undefined,
   -44: #6.TBD4({
     -1: 68345,
     1: 6645765,
@@ -106,9 +109,7 @@ An ASDA Key Set ( CBOR Tag `#6.TBD4(map)`) contains a map with keys from the ASD
 ~~~
 {: #asdaks-example title="ASDAM & ASDA Key Set Example"}
 
-It should be noted that the use of the `[null, null, null]` or `undefined` for the ASC is a signal that the ASDAM contains only ASDA Key Sets at their respective ASDA-IKS and/or ASDA-OKS key values.
-
-ASDA Key Sets can be exchanged using the above tags either in-band or out-of-band as needed. It is up to a protocol specification how and when these ASDA Key Sets are discovered and exchanged.
+It should be noted that the use of the `undefined` for the ASC is a signal that the ASDAM contains only ASDA Key Sets at their respective ASDA-IKS and/or ASDA-OKS key values. An application MAY include ASDA Key Sets in any ASC Mode.
 
 ## Supporting JSON {#json-names}
 
