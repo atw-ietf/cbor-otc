@@ -1,0 +1,7 @@
+#6.TBD2 = [
+  ? uint_base: uint,
+  ? nint_base: nint / null,
+  ? bstr_base: [prefix: bstr, suffix: bstr],
+  ? tstr_base: [prefix: tstr, suffix: tstr],
+  ? float_base: float,
+] / null

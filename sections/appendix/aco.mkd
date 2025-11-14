@@ -1,20 +1,17 @@
 # ACO Examples {#aco-examples}
 
-## Direct
-
 ~~~ ascii-text
-flat-cota = #6.TBD1([
+#6.TBD1([
   #6.TBD2([237.0]),
   0.6324,
   0.0432,
   0.7162
 ])
 ~~~
-
-## Indirect
+{: #direct-aco title="Direct ACO/OCC Example"}
 
 ~~~ ascii-text
-nested-cota = #6.TBD1([
+#6.TBD1([
   #6.TBD2([237.0]),
   0.6324,
   0.0432,
@@ -27,5 +24,6 @@ nested-cota = #6.TBD1([
   ])
 ])
 ~~~
+{: #nested-aco title="Nested ACO/OCC Example"}
 
-Note that the `#6.TBD2([1024])` fully expanded per {{mod-occ}} would be `#6.TBD2([237.0, 1024])` as the previous OCC is still considered active.
+Note that the `#6.TBD2([1024])` in {{nested-aco}} fully expanded per {{mod-occ}} would be `#6.TBD2([237.0, 1024])` as the previous OCC is still considered active.

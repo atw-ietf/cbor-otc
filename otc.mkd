@@ -27,3 +27,5 @@ This document standardizes a method to compress groupings of CBOR ordinal types 
 --- back
 
 {::include-nested sections/appendix/aco.mkd}
+
+{::include-nested sections/appendix/asdam.mkd}

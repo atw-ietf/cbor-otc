@@ -1,4 +1,4 @@
-# Using Compressed Integers for Keys in CBOR Maps
+# Compressed Integer Keys for CBOR Maps
 
 Keys in CBOR maps can be either integers (`int`) or strings (`tstr`). For most specifications interested in the concise encoding of CBOR integers, the mapping to JSON is relegated to registrations in a IANA registry requesting both a number and string for registration (see {{json-names}}). Since the keys in a map can be integers the concept described in {{aco}} can be used in a more specific case to compress the keys in a map. This method is called "Application Specific Dynamically Assigned Map" or ASDAM.
 
@@ -22,6 +22,8 @@ Two special ranges are defined to support smaller encodings of keys: Application
 To should be noted that the subdivision of the range between `256` and `(2^64)-1` is a recommendation. A protocol standard may adjust this section of the range to fit their specific requirements. For example instead of any subdivision this part of the Label range can all be First Come First Served. A protocol may also choose to merge the ASDA-OKS range either into Private Use or ASDA-IKS.
 
 A map under a protocol using this specification MUST be enclosed in the tag `#6.TBD3(map)` to represent ASDAM compliance and MUST always include Label 0 with a value as defined in {{asc}} to keep the property of "self-describing" in CBOR intact and provide local context to the current scope for the keys. Failure to do so can result in undefined behavior on decoders such as failing to perform a clean context switch. A map MAY use keys outside its context at any point by using that keys registered Label.
+
+Various examples of ASDAM are presented in {{asdam-examples}}.
 
 ## Application Specific Context (ASC) {#asc}
 
@@ -94,20 +96,12 @@ ASDA Key Sets can be exchanged using the tags in {{asdaks}} either in-band or ou
 
 ### ASDA Key Set {#asdaks}
 
-An ASDA Key Set (`#6.TBD4(map)`) contains a map with keys from the ASDAK and/or XASDAK range pointing to their respective curated key. The ASDA Key Set can be found as part of an ASDAM under keys of the ASDA-IKS or ASDA-OKS range. {{asdaks-example}} provides a short example of a standalone Key Set using the ASC Mode.
+An ASDA Key Set (`#6.TBD4(map)`) contains a map with keys from the ASDAK and/or XASDAK range pointing to their respective curated key. The ASDA Key Set can be found as part of an ASDAM under keys of the ASDA-IKS or ASDA-OKS range. {{asdaks-short-example}} provides a short example of a standalone Key Set using the ASC Mode.
 
 ~~~ ascii-text
-#6.TBD3({
-  0: undefined,
-  -44: #6.TBD4({
-    -1: 68345,
-    1: 6645765,
-    2: 800
-  }),
-  -5000: { ... }
-})
+{::include figures/asdaks.txt}
 ~~~
-{: #asdaks-example title="ASDAM & ASDA Key Set Example"}
+{: #asdaks-short-example title="ASDAM & ASDA Key Set Example"}
 
 It should be noted that the use of the `undefined` for the ASC is a signal that the ASDAM contains only ASDA Key Sets at their respective ASDA-IKS and/or ASDA-OKS key values. An application MAY include ASDA Key Sets in any ASC Mode.
 
