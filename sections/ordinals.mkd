@@ -1,42 +1,47 @@
-# Ordinal Type Compression {#otc}
+# Arrays with Compressed Ordinals {#aco}
 
 A group of ordinal values, such as an array of integers or floats, can be compressed in CBOR with a locality of reference by applying a technique similar to block floating point. This has an advantage of dereferencing the larger, typically common, portion of a group values once (called an "context, "block" or "base") leaving the individual elements to be smaller deviations (called "offsets") from that reference.
 
-For a oversimplified example the numbers `1.6324`, `1.0432` and `1.7162` all share a base of `1.0` enabling the values to be encoded as their offsets of `0.6324`, `0.0432` and `0.7162` with a transmitted base of `1` used by decoders to re-expand to the original values.
+For a oversimplified example the numbers `237.6324`, `237.0432` and `237.7162` all share a base of `237.0` enabling the values to be encoded as their offsets of `0.6324`, `0.0432` and `0.7162` with a transmitted base of `237.0` used by decoders to re-expand to the original values.
 
-This document standardizes a new CBOR Tag (`#6.TBD(array)`) called "Ordinal Group Compression" (OGC) to indicate such a compression occurring for the given ordinal types within a structure (i.e. array or map) that includes this tag against any ordinal type (`int`, `float`, etc.). The contents of the tag are defined in {{tag-ogc}}.
+To provide a concise and well-defined method of determining if a group (or sequence) of values are being compressed this document standardizes two new CBOR tags: one for indicating an array's values are being compressed (`#6.TBD1(array)`, referred to as "array with compressed ordinals (ACO)") and another for indicating the ordinal types being compressed and their base values in an array (`#6.TBD2(array / null)`, defined in {{tag-occ}}) referred to as the "ordinal compression context (OCC)". Examples are provided in {{coa-examples}}.
 
 ~~~ ascii-text
-#6.TBD = [
+#6.TBD2 = [
   ? uint_base: uint,
-  ? nint_base: nint,
-  ? bstr_base: [prefix: bstr / null, suffix: bstr / null],
-  ? tstr_base: [prefix: tstr / null, suffix: tstr / null],
+  ? nint_base: nint / null,
+  ? bstr_base: [prefix: bstr, suffix: bstr],
+  ? tstr_base: [prefix: tstr, suffix: tstr],
   ? float_base: float,
-]
+] / null
 ~~~
-{: #tag-ogc title="Ordinal Group Compression Tag CDDL"}
+{: #tag-occ title="Ordinal Compression Context (OCC) Tag CDDL"}
 
-The tag MUST be either the first element in an array or a defined key in map. When structures are nested the local nested scope OGC tag, if present, takes precedence over any parent scope OGC tag . This applies to the individual ordinal types in the tag not the whole tag itself. So individual types can be re-scoped without losing the others from the parent scope.  
+An ACO MUST contain as its first element (index zero) an OCC. Array elements in the ACO tag MUST be handle in positive incremental element order (i.e. 0 to N). The subsequent values after the OCC are to handled as offsets to be added or subtracted from the same ordinal type in the OCC.
 
-For example an array with the previous values as example would be tagged for encoding in CBOR as follows:
+## OCC Modification {#mod-occ}
 
-~~~ ascii-text
-tagged = [
-  #6.TBD([1.0]),
-  0.6324,
-  0.0432,
-  0.7162
-]
-~~~
+An OCC can be changed in a few different ways depending on scope depending on if the OCC is in the current "direct" scope or in a nested "indirect" scope. A "direct scope" is the flat array of values the OCC is found in applying only to the subsequent values in the array after it, where as a "nested scope" is an array that is tagged to use ACO within an existing ACO. 
 
-base 1024, offset +3, -4, 0, to represent 1027, 1020, 1024
+The first OCC is special in that omission of an ordinal type in that OCC indicates that no compression is being applied to that ordinal type. The default values of the ordinal types in the first OCC are shown in {{first-occ}}:
 
-~~~ ascii-text
-tagged = [
-  #6.TBD([1024]),
-  3,
-  -4,
-  0
-]
-~~~
+| Ordinal Type | Omitted Value (Initial OCC Only) | Disable ("Zero") Value |
+| ------------ | -------------------------------- | ---------------------- |
+| `uint` | 0 | 0 |
+| `nint` | 0 | `null` |
+| `bstr` | `["", ""]` | `["", ""]` |
+| `tstr` | `["", ""]` | `["", ""]` |
+| `float` | 0.0 | 0.0 |
+{: #first-occ title="Ordinal Values for Initial Omission & Explicit Disable"}
+
+It should be noted that an ACO can have two different states to indicate that no compression is being performed. First is the use of no ACO tag at all, second is that the OCC is set to an empty array. If the OCC is the first to be found when decoding an ACO and set to `null` then there is an error in the encoding and the decoder should not perform compression at all and just return the entire array as is.
+
+In "direct OCC", encountering a new OCC merges it with the old OCC. When a new OCC has a matching ordinal type with a different value it overwrites the old OCC value. If the new OCC omits a type that is present in the old OCC, then that ordinal value is inherited from the old OCC.
+
+To disable an ordinal type compression from an old OCC, that ordinal type value is set to that ordinals respective "zero" (`uint`, `nint`, `float`) or "empty" (`bstr`, `tstr`) value in the new OCC. For example a `float` would be set  in the new OCC to `0.0` to signal that the ordinal type is no longer being compressed in subsequent values of that type.
+
+As a more complex example `#6.TBD2([237.0, -44, ["pre-", ""]])` and `#6.TBD2([15.0, 1024, ["", ""]])` would combine to be an OCC of `#6.TBD2([15.0, -44, 1024, ["", ""]])` where the array has a new compression context handling floats, negative integers, and unsigned integers.
+
+An "indirect OCC" is treated similar to a "direct OCC" with one difference. The first element of this nested ACO MUST be an OCC that MUST be `null` (i.e. `#6.TBD2(null)`) to indicate the parent OCC is still in use without modification or is an array that modifies the OCC with the same rules as above. Once the nested ACO is processed the OCC MUST be returned to its original values before entering the nested ACO.
+
+It is the job of the decoder to keep track of the modifications of OCC with "direct OCC" and coming in/out of an "indirect OCC".

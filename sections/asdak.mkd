@@ -1,6 +1,6 @@
 # Using OGC for Keys in CBOR Maps
 
-Keys in CBOR maps can be either integers (`int`) or strings (`tstr`). For most specifications interested in the concise encoding of CBOR integers, the mapping to JSON is relegated to registrations in a IANA registry requesting both a number and string for registration (see {{json-names}}). Since the keys in a map can be integers the concept of OGC can be used in a more specific case to compress the keys in a map. This method is called "Application Specific Dynamically Assigned" or ASDA.
+Keys in CBOR maps can be either integers (`int`) or strings (`tstr`). For most specifications interested in the concise encoding of CBOR integers, the mapping to JSON is relegated to registrations in a IANA registry requesting both a number and string for registration (see {{json-names}}). Since the keys in a map can be integers the concept described in {{aco}} can be used in a more specific case to compress the keys in a map. This method is called "Application Specific Dynamically Assigned Map" or ASDAM.
 
 This document assumes a specification will create a registry that uses the full CBOR integer range of `-2^64^` to `2^64^-1`. {{asdak-ranges}} defines a standard Label registry policy for protocol standards to use with large ecosystems expecting multiple applications with potentially shared key sets to be used in maps.
 
