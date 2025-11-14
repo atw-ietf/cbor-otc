@@ -1,4 +1,4 @@
-# COTA Examples {#coa-examples}
+# ACO Examples {#aco-examples}
 
 ## Direct
 

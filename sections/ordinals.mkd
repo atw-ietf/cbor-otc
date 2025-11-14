@@ -4,7 +4,7 @@ A group of ordinal values, such as an array of integers or floats, can be compre
 
 For a oversimplified example the numbers `237.6324`, `237.0432` and `237.7162` all share a base of `237.0` enabling the values to be encoded as their offsets of `0.6324`, `0.0432` and `0.7162` with a transmitted base of `237.0` used by decoders to re-expand to the original values.
 
-To provide a concise and well-defined method of determining if a group (or sequence) of values are being compressed this document standardizes two new CBOR tags: one for indicating an array's values are being compressed (`#6.TBD1(array)`, referred to as "array with compressed ordinals (ACO)") and another for indicating the ordinal types being compressed and their base values in an array (`#6.TBD2(array / null)`, defined in {{tag-occ}}) referred to as the "ordinal compression context (OCC)". Examples are provided in {{coa-examples}}.
+To provide a concise and well-defined method of determining if a group (or sequence) of values are being compressed this document standardizes two new CBOR tags: one for indicating an array's values are being compressed (`#6.TBD1(array)`, referred to as "array with compressed ordinals (ACO)") and another for indicating the ordinal types being compressed and their base values in an array (`#6.TBD2(array / null)`, defined in {{tag-occ}}) referred to as the "ordinal compression context (OCC)". Examples are provided in {{aco-examples}}.
 
 ~~~ ascii-text
 #6.TBD2 = [
